@@ -56,12 +56,14 @@ const LoginForm = ({
     }
 
     try {
+
       const res = await login(data).unwrap();
+console.log(res);
 
       if (!res?.user?.isVerified) {
         toast.error("Your're not verified");
         navigate("/verify", {
-          state: { email: data.email, role: res?.data?.user?.role },
+          state: { email: data.email, role: res?.user?.role },
         });
         return await logout(undefined);
       }

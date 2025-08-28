@@ -61,12 +61,14 @@ export default function Verify() {
     const toastId = toast.loading("Sending OTP");
 
     try {
-      await sendOtp({ email: email, role : role }).unwrap();
+      
+      await sendOtp({ email: email, role : role }).unwrap();      
       toast.success("OTP Sent", { id: toastId });
       setConfirmed(true);
       setTimer(5);
       
     } catch (err) {
+      
       console.log(err);
     }
   };
