@@ -103,10 +103,12 @@ export function UserRegisterForm({
     }
 
     try {
-      const toastId = toast.loading("Creating User");
+
       await register(userInfo).unwrap();
+      const toastId = toast.loading("Creating User");
       toast.success("User created successfully", { id: toastId });
       navigate("/verify", { state: { email: data.email, role: "USER" } });
+      
     } catch (error) {
       console.error(error);
     }

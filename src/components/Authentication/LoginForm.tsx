@@ -58,7 +58,6 @@ const LoginForm = ({
     try {
 
       const res = await login(data).unwrap();
-console.log(res);
 
       if (!res?.user?.isVerified) {
         toast.error("Your're not verified");
