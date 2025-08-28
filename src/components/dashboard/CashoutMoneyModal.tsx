@@ -11,18 +11,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { FormProvider, useForm } from "react-hook-form";
 import { Input } from "../ui/input";
-import {
-  authApi,
-  useSendMoneyMutation,
-} from "@/redux/features/auth/auth.api";
+import { authApi, useSendMoneyMutation } from "@/redux/features/auth/auth.api";
 import { toast } from "sonner";
 import { useAppDispatch } from "@/redux/hook";
 import { FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Button } from "../ui/button";
 
 interface MONEY {
-  money : string,
-  email : string,
+  money: string;
+  email: string;
 }
 
 const CashOutMoneyModal = () => {
@@ -47,14 +44,9 @@ const CashOutMoneyModal = () => {
 
       const toastId = toast.loading("Cash out money");
       if (res.error) {
-        if (res?.error?.data?.message === "Receiver account doesn't exists") {
-          return toast.error("Wrong email address", { id: toastId });
-        }
-        if (
-          res?.error?.data?.message === "Insufficient funds for this operation."
-        ) {
-          return toast.error("Insufficient funds", { id: toastId });
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ddd: any = res.error;
+        return toast.error(ddd?.data.message, { id: toastId });
       }
       toast.success("successfully cashed out money", { id: toastId });
       dispatch(authApi.util.resetApiState());

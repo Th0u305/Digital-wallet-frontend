@@ -96,8 +96,8 @@ export const authApi = baseApi.injectEndpoints({
       providesTags : ["GET_TRANSACTIONS_HISTORY"]
     }),
     getAllInfoByAdmin : builder.query({
-      query : ({view, filterBy, sortBy, limit, isVerified, walletStatus, page}) =>({
-        url : `/admin/getData?view=${view}&filterBy=${filterBy}&sortBy=${sortBy}t&limit=${limit}&isVerified=${isVerified}&walletStatus=${walletStatus}&page=${page}`,
+      query : ({view, filterBy, sortBy, limit, isVerified, walletStatus, page, search}) =>({
+        url : `/admin/getData?view=${view}&filterBy=${filterBy}&sortBy=${sortBy}t&limit=${limit}&isVerified=${isVerified}&walletStatus=${walletStatus}&page=${page}&search=${search}`,
         method : "GET"
       }),
       providesTags : ["GET_ALL_ADMIN_DATA"]

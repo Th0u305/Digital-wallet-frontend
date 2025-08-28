@@ -25,12 +25,11 @@ import { toast } from "sonner";
 import { useAppDispatch } from "@/redux/hook";
 
 interface MONEY {
-  money : string,
-  email : string,
+  money: string;
+  email: string;
 }
 
-const SendMoneyModal = () =>{
-  
+const SendMoneyModal = () => {
   const [sendMoney] = useSendMoneyMutation();
   const dispatch = useAppDispatch();
   const form = useForm({
@@ -45,104 +44,100 @@ const SendMoneyModal = () =>{
       amount: Number(data.money),
       transactionType: "SEND_MONEY",
     };
-    
+
     try {
       const res = await sendMoney({ userInfo, id });
-      console.log(res);
-      
+
       const toastId = toast.loading("Sending money");
       if (res.error) {
-        if (res?.error?.data?.message === "Receiver account doesn't exists") {
-          return toast.error("Wrong email address", { id : toastId})
-        }
-        if (res?.error?.data?.message === "Insufficient funds for this operation.") {
-          return toast.error("Insufficient funds", { id : toastId})
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ddd: any = res.error;
+        return toast.error(ddd?.data.message, { id: toastId });
       }
       toast.success("successfully sent money", { id: toastId });
       dispatch(authApi.util.resetApiState());
-      
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err:any) {
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       toast.error(err.data.message);
     }
   };
 
-    return (
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <span>
-            <button className="group-hover:scale-110 transition-transform p-0 mx-auto w-6 h-6 mt-3 cursor-pointer">
-              <Send />
-            </button>
-          </span>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          </AlertDialogHeader>
-          <AlertDialogDescription />
-          <FormProvider {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* name */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel> Recipient email Number</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="example@gmail.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription className="sr-only">
-                      This is your public display name.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <span>
+          <button className="group-hover:scale-110 transition-transform p-0 mx-auto w-6 h-6 mt-3 cursor-pointer">
+            <Send />
+          </button>
+        </span>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogDescription />
+        <FormProvider {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* name */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel> Recipient email Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="example@gmail.com"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription className="sr-only">
+                    This is your public display name.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="money"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={50}
-                        placeholder="0.00"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription className="sr-only">
-                      This is your public display name.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="money"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={50}
+                      placeholder="0.00"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription className="sr-only">
+                    This is your public display name.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <Button type="submit" className="w-full">
-                Sent
-              </Button>
-            </form>
-          </FormProvider>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-            // onClick={()=>setisopen(!open)}
-            >
-              Cancel
-            </AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
-  };
+            <Button type="submit" className="w-full">
+              Sent
+            </Button>
+          </form>
+        </FormProvider>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+          // onClick={()=>setisopen(!open)}
+          >
+            Cancel
+          </AlertDialogCancel>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 export default SendMoneyModal;

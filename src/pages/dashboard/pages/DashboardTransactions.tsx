@@ -33,7 +33,6 @@ export default function DashboardTransactions() {
 
   const [ currentPage, setCurrentPage ] = useState<number>(1)
   const { data } = useGetTransactionHistoryQuery(currentPage);
-  console.log(data);
   
 
   return (
@@ -106,11 +105,12 @@ export default function DashboardTransactions() {
                   <TableHead className="w-[100px]">Transactions Id</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Method</TableHead>
+                  <TableHead>Transaction type</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data?.map((invoice: any, idx: number) => (
+                {data?.data?.map((invoice: any, idx: number) => (
                   <TableRow key={idx}>
                     <TableCell className="font-medium">
                       {invoice.transactionId}
@@ -120,6 +120,7 @@ export default function DashboardTransactions() {
                         invoice.status.substring(1).toLowerCase()}
                     </TableCell>
                     <TableCell>Bank transfer</TableCell>
+                    <TableCell className="capitalize">{invoice?.transactionType.split("_").join(" ").toLowerCase()}</TableCell>
                     <TableCell className="text-right">
                       {invoice.amount}
                     </TableCell>

@@ -50,14 +50,9 @@ const CashInMoneyModal = () => {
       const toastId = toast.loading("Cash in money");
 
       if (res.error) {
-        if (res?.error?.data?.message === "Receiver account doesn't exists") {
-          return toast.error("Wrong email address", { id: toastId });
-        }
-        if (
-          res?.error?.data?.message === "Insufficient funds for this operation."
-        ) {
-          return toast.error("Insufficient funds", { id: toastId });
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ddd: any = res.error;
+        return toast.error(ddd?.data.message, { id: toastId });
       }
       toast.success("successfully cashed in money", { id: toastId });
       dispatch(authApi.util.resetApiState());

@@ -93,7 +93,7 @@ export function UserActionModal({
       const res = await statusChange({action, id})
       if (res) {
         const toastId = toast.loading(`${action} user`);
-        toast.success(`Successfully ${action.toLowerCase()} user`, { id : toastId});
+        toast.success(`Successfully ${action?.toLowerCase()} user`, { id : toastId});
         dispatch(authApi.util.resetApiState())
         setAction("")
         setReason("")
@@ -137,7 +137,7 @@ export function UserActionModal({
               <div className="flex justify-between">
                 <span className="text-sm font-medium">Current Status:</span>
                 <span className="text-sm capitalize">
-                  {user.walletStatus.toLowerCase()}
+                  {user.walletStatus?.toLowerCase()}
                 </span>
               </div>
             </div>
@@ -158,14 +158,14 @@ export function UserActionModal({
               {/* {user?.walletStatus.toLowerCase() === "pending" && (
                 <SelectItem value="approve">Approve</SelectItem>
               )} */}
-              {user?.walletStatus.toLowerCase() === "active" && (
+              {user?.walletStatus?.toLowerCase() === "active" && (
                 <SelectItem value="SUSPENDED">Suspend</SelectItem>
               )}
-              {user?.walletStatus.toLowerCase() === "active" && (
+              {user?.walletStatus?.toLowerCase() === "active" && (
                 <SelectItem value="BLOCKED">Block</SelectItem>
               )}
-              {(user?.walletStatus.toLowerCase() === "suspended" ||
-                user?.walletStatus.toLowerCase() === "blocked") && (
+              {(user?.walletStatus?.toLowerCase() === "suspended" ||
+                user?.walletStatus?.toLowerCase() === "blocked") && (
                 <SelectItem value="ACTIVE">Activate User</SelectItem>
               )}
             </SelectContent>

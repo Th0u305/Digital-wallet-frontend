@@ -50,24 +50,26 @@ import Pagination from "@/components/ui/pagination";
 
 export default function AdminUsersPage() {
   const [filters, setFilters] = useState<UserFilters>({});
-  // const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null)
   const [currentPage, setCurrentPage] = useState<number>(1);
 
 
-  const { data, refetch } = useGetAllInfoByAdminQuery({
+  const { data, refetch, error } = useGetAllInfoByAdminQuery({
     view: filters.role === undefined ? "user" : filters.role,
-    filterBy: "wallet",
+    filterBy: "transaction",
     sortBy: filters.sortOrder === undefined ? "asc" : filters.sortOrder,
     walletStatus:
       filters.walletStatus === undefined ? "ACTIVE" : filters.walletStatus,
     isVerified: filters.isVerified === undefined ? true : filters.isVerified,
     limit: 20,
-    page : currentPage
+    page : currentPage,
+    search : searchTerm
   });
-
-  const users = data?.data?.data;
+  console.log(data);
+  
+console.log(error);
 
   const handleFilterChange = (key: keyof UserFilters, value: string) => {
     refetch();
@@ -75,13 +77,7 @@ export default function AdminUsersPage() {
       ...prev,
       [key]: value,
     }));
-  };
-
-  // const handleSearch = (e) => {
-  //   const ff = e.target.value
-
-  //   setSearchTerm(ff);
-  // };
+  }
 
   const handleUserAction = (user:any) => {
     setSelectedUser(user)
@@ -159,7 +155,7 @@ export default function AdminUsersPage() {
         <Card>
           <CardHeader>
             <CardTitle>All Users</CardTitle>
-            <CardDescription>{users?.length} found</CardDescription>
+            <CardDescription>{data?.data?.length} found</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Filters */}
@@ -168,7 +164,7 @@ export default function AdminUsersPage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search users by name, email, or ID..."
-                  // onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -250,13 +246,13 @@ export default function AdminUsersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users?.map((user: any) => (
+                  {data?.data?.map((user: any) => (
                     <TableRow key={user?._id}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
                           <Avatar className="h-8 w-8">
                             <AvatarImage
-                              src={users?.picture || "/placeholder.svg"}
+                              src={user?.picture || "/placeholder.svg"}
                               alt={user?.name}
                             />
                             <AvatarFallback>
@@ -273,7 +269,7 @@ export default function AdminUsersPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {getStatusBadge(user?.walletStatus.toLowerCase())}
+                        {getStatusBadge(user?.walletData?.walletStatus?.toLowerCase() || user?.walletStatus.toLowerCase())}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={
@@ -292,7 +288,7 @@ export default function AdminUsersPage() {
                       <TableCell>
                         <div>
                           <p className="font-medium">
-                            ${user?.walletData?.balance?.toFixed(2)}
+                            ${user?.walletData?.balance?.toFixed(2) || user?.walletBalance}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Total: ${user?.totalTransacted?.toLocaleString()}
