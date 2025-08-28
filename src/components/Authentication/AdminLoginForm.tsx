@@ -9,20 +9,26 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { authApi, useLoginMutation, useLogoutMutation, useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import {
+  authApi,
+  useLoginMutation,
+  useLogoutMutation,
+  useUserInfoQuery,
+} from "@/redux/features/auth/auth.api";
 import { type FieldValues, type SubmitHandler, useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import Password from "../ui/password";
 import { useAppDispatch } from "@/redux/hook";
 
-const AdminLoginForm = ({ className,...props}: React.HTMLAttributes<HTMLDivElement>) => {
-
+const AdminLoginForm = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
   const navigate = useNavigate();
-  const { data : userData } = useUserInfoQuery(undefined);
+  const { data: userData } = useUserInfoQuery(undefined);
   const dispatch = useAppDispatch();
   const [logout] = useLogoutMutation();
-
 
   const form = useForm({
     defaultValues: {
@@ -34,58 +40,53 @@ const AdminLoginForm = ({ className,...props}: React.HTMLAttributes<HTMLDivEleme
   const [login] = useLoginMutation();
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    
-
     if (userData?.data?.email) {
-      toast.error("You're already logged in")
-      navigate("/")
-      return
+      toast.error("You're already logged in");
+      navigate("/");
+      return;
     }
 
     const UserData = {
-        email : data?.email,
-        password : data?.password,
-        role : "ADMIN"
-    }
-
+      email: data?.email,
+      password: data?.password,
+      role: "ADMIN",
+    };
 
     try {
-        const res = await login(UserData).unwrap();
+      const res = await login(UserData).unwrap();
 
-      if (res.success) {
-
-        if(!res?.data?.user?.isVerified) {
-          toast.error("Your're not verified")
-          navigate("/verify", { state: { email : data.email , role : res?.data?.user?.role}});
-          return await logout(undefined);
-        }
-        
-        const toastId = toast.loading("Logging");        
-        toast.success("Logged in successfully", { id : toastId});
-        navigate("/");
-        dispatch(authApi.util.resetApiState());
-
+      if (!res?.user?.isVerified) {
+        toast.error("Your're not verified");
+        navigate("/verify", {
+          state: { email: data.email, role: res?.data?.user?.role },
+        });
+        return await logout(undefined);
       }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const toastId = toast.loading("Logging");
+      toast.success("Logged in successfully", { id: toastId });
+      navigate("/");
+      dispatch(authApi.util.resetApiState());
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.log(err);
 
       if (err?.data) {
-        toast.error("Something went wrong")
+        toast.error("Something went wrong");
       }
-      
-      // if (err.data?.message === "No account found with this email") {
-      //   toast.error("No account found")
-      // }
 
-      // if (err?.data?.message === "Password does not match" || err?.data?.message === "Incorrect password") {
-      //   toast.error("Invalid credentials");
-      // }
+      if (err.data?.message === "No account found with this email") {
+        toast.error("No account found")
+      }
+
+      if (err?.data?.message === "Password does not match" || err?.data?.message === "Incorrect password") {
+        toast.error("Invalid credentials");
+      }
 
       if (err?.data?.message === "User is not verified") {
         toast.error("Your account is not verified");
-        navigate("/verify", { state: { email : data.email , role : data.role}});
+        navigate("/verify", { state: { email: data.email, role: data.role } });
       }
     }
   };
@@ -144,26 +145,9 @@ const AdminLoginForm = ({ className,...props}: React.HTMLAttributes<HTMLDivEleme
             Or continue with
           </span>
         </div>
-
-        <Button
-          onClick={() =>
-            window.open(`${import.meta.env.VITE_BASE_URL}/auth/google`)
-          }
-          type="button"
-          variant="outline"
-          className="w-full cursor-pointer"
-        >
-          Login with Google
-        </Button>
-      </div>
-      <div className="text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <Link to="/register" replace className="underline underline-offset-4">
-          Register
-        </Link>
       </div>
     </div>
   );
-}
+};
 
-export default AdminLoginForm
+export default AdminLoginForm;

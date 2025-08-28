@@ -16,8 +16,8 @@ const UserDashboardAnalytics = () => {
   const { data: userData } = useUserInfoQuery(undefined);
   
 
-  const balance = data?.data?.wallet?.balance;
-  const transactions = data?.data?.allTransactions;
+  const balance = data?.wallet?.balance;
+  const transactions = data?.allTransactions;
 
   const stats = [
     {

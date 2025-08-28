@@ -7,26 +7,11 @@ import CashOutMoneyModal from "./CashoutMoneyModal";
 import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
 import UserAddMoneyModal from "./UserAddMoneyModal";
 import AddMoneyModal from "./AddMoneyModal";
+import UserCashOutModal from "./UserCashOutModal";
 
 const QuickActions = () => {
   const { data } = useUserInfoQuery(undefined);
 
-  const actions = [
-    {
-      id: "send-money-btn",
-      title: "Send Money",
-      description: "Transfer to friends & family",
-      icon: SendMoneyModal,
-      color: "primary",
-    },
-    {
-      id: "cash-out-feature",
-      title: "Cash out",
-      description: "Cash out your money",
-      icon: CashOutMoneyModal,
-      color: "success",
-    },
-  ];
 
   const userAction = [
     {
@@ -43,7 +28,20 @@ const QuickActions = () => {
       icon: UserAddMoneyModal,
       color: "accent",
     },
-    ...actions,
+    {
+      id: "send-money-btn",
+      title: "Send Money",
+      description: "Transfer to friends & family",
+      icon: SendMoneyModal,
+      color: "primary",
+    },
+    {
+      id: "cash-out-feature",
+      title: "Cash out",
+      description: "Cash out customers money",
+      icon: UserCashOutModal,
+      color: "success",
+    },
   ];
 
   const agentActions = [
@@ -54,7 +52,20 @@ const QuickActions = () => {
       icon: CashInMoneyModal,
       color: "accent",
     },
-    ...actions,
+    {
+      id: "send-money-btn",
+      title: "Send Money",
+      description: "Transfer to friends & family",
+      icon: SendMoneyModal,
+      color: "primary",
+    },
+    {
+      id: "cash-out-feature",
+      title: "Cash out",
+      description: "Cash out customers money",
+      icon: CashOutMoneyModal,
+      color: "success",
+    },
     {
       id: "add-money-btn",
       title: "Add Money",

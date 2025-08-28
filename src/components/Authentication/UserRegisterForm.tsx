@@ -16,9 +16,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import Password from "../ui/password";
-import { useUserRegisterMutation } from "@/redux/features/auth/auth.api";
+import {
+  useUserInfoQuery,
+  useUserRegisterMutation,
+} from "@/redux/features/auth/auth.api";
 
-const registerSchema = z.object({
+const registerSchema = z
+  .object({
     name: z
       .string({ error: "Name must be string" })
       .min(2, { message: "Name must be at least 2 characters long." })
@@ -54,7 +58,7 @@ const registerSchema = z.object({
       }),
     phone: z
       .string({ error: "Phone Number must be string" })
-      .min(12,"Phone number is less than 12 character")
+      .min(12, "Phone number is less than 12 character")
       .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
         message:
           "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
@@ -65,10 +69,13 @@ const registerSchema = z.object({
     path: ["confirmPassword"],
   });
 
-export function UserRegisterForm({className,...props}: React.HTMLAttributes<HTMLDivElement>) {
-
+export function UserRegisterForm({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   const [register] = useUserRegisterMutation();
   const navigate = useNavigate();
+  const { data: userData } = useUserInfoQuery(undefined);
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -82,19 +89,24 @@ export function UserRegisterForm({className,...props}: React.HTMLAttributes<HTML
   });
 
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
-
     const userInfo = {
       name: data.name,
       email: data.email,
       password: data.password,
-      phone : data.phone
+      phone: data.phone,
     };
-    
+
+    if (userData?.data?.email) {
+      toast.error("You're already logged in");
+      navigate("/");
+      return;
+    }
+
     try {
       const toastId = toast.loading("Creating User");
       await register(userInfo).unwrap();
-      toast.success("User created successfully", { id : toastId});
-      navigate("/verify", { state: { email : data.email , role : "USER"}});
+      toast.success("User created successfully", { id: toastId });
+      navigate("/verify", { state: { email: data.email, role: "USER" } });
     } catch (error) {
       console.error(error);
     }
@@ -105,7 +117,6 @@ export function UserRegisterForm({className,...props}: React.HTMLAttributes<HTML
       <div className="grid gap-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
             {/* name */}
             <FormField
               control={form.control}
@@ -114,7 +125,12 @@ export function UserRegisterForm({className,...props}: React.HTMLAttributes<HTML
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input required type="text" placeholder="John Doe" {...field} />
+                    <Input
+                      required
+                      type="text"
+                      placeholder="John Doe"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription className="sr-only">
                     This is your public display name.
@@ -155,7 +171,12 @@ export function UserRegisterForm({className,...props}: React.HTMLAttributes<HTML
                 <FormItem>
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
-                    <Input required placeholder="+031235425" type="phone" {...field} />
+                    <Input
+                      required
+                      placeholder="+031235425"
+                      type="phone"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription className="sr-only">
                     This is your public display name.

@@ -33,6 +33,7 @@ export default function DashboardTransactions() {
 
   const [ currentPage, setCurrentPage ] = useState<number>(1)
   const { data } = useGetTransactionHistoryQuery(currentPage);
+  console.log(data);
   
 
   return (
@@ -109,7 +110,7 @@ export default function DashboardTransactions() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data?.data.map((invoice: any, idx: number) => (
+                {data?.map((invoice: any, idx: number) => (
                   <TableRow key={idx}>
                     <TableCell className="font-medium">
                       {invoice.transactionId}

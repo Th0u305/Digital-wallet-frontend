@@ -91,7 +91,7 @@ export function UserActionModal({
     try {
 
       const res = await statusChange({action, id})
-      if (res?.data?.success) {
+      if (res) {
         const toastId = toast.loading(`${action} user`);
         toast.success(`Successfully ${action.toLowerCase()} user`, { id : toastId});
         dispatch(authApi.util.resetApiState())

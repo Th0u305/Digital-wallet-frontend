@@ -25,10 +25,9 @@ import { toast } from "sonner";
 import { useAppDispatch } from "@/redux/hook";
 
 interface MONEY {
-  money : string,
-  email : string
+  money: string;
+  email: string;
 }
-
 
 const CashInMoneyModal = () => {
   const [sendMoney] = useSendMoneyMutation();
@@ -51,14 +50,21 @@ const CashInMoneyModal = () => {
       const toastId = toast.loading("Cash in money");
 
       if (res.error) {
-        return toast.error("Something went wrong", { id: toastId });
+        if (res?.error?.data?.message === "Receiver account doesn't exists") {
+          return toast.error("Wrong email address", { id: toastId });
+        }
+        if (
+          res?.error?.data?.message === "Insufficient funds for this operation."
+        ) {
+          return toast.error("Insufficient funds", { id: toastId });
+        }
       }
       toast.success("successfully cashed in money", { id: toastId });
       dispatch(authApi.util.resetApiState());
-      
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {      
-      toast.error("Something went wrong");
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.error(err.data.message);
       // console.log(error);
     }
   };
@@ -85,7 +91,7 @@ const CashInMoneyModal = () => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel> Recipient Phone Number</FormLabel>
+                  <FormLabel> Recipient email Number</FormLabel>
                   <FormControl>
                     <Input
                       type="email"

@@ -16,9 +16,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import Password from "../ui/password";
-import { useAgentRegisterMutation } from "@/redux/features/auth/auth.api";
+import { useAgentRegisterMutation, useUserInfoQuery } from "@/redux/features/auth/auth.api";
 
-const registerSchema = z.object({
+const registerSchema = z
+  .object({
     name: z
       .string({ error: "Name must be string" })
       .min(2, { message: "Name must be at least 2 characters long." })
@@ -54,7 +55,7 @@ const registerSchema = z.object({
       }),
     phone: z
       .string({ error: "Phone Number must be string" })
-      .min(12,"Phone number is less than 12 character")
+      .min(12, "Phone number is less than 12 character")
       .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
         message:
           "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
@@ -62,21 +63,23 @@ const registerSchema = z.object({
     address: z
       .string({ error: "Address must be string" })
       .max(200, { message: "Address cannot exceed 200 characters." }),
-    nidNumber: z
-      .string().min(10, "A valid NID number is required"),
+    nidNumber: z.string().min(10, "A valid NID number is required"),
   })
   .refine((data) => data?.password === data?.confirmPassword, {
     message: "Password do not match",
     path: ["confirmPassword"],
   });
 
-export function AgentRegisterForm({className,...props}: React.HTMLAttributes<HTMLDivElement>) {
+export function AgentRegisterForm({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   const [register] = useAgentRegisterMutation();
   const navigate = useNavigate();
-
+  const { data: userData } = useUserInfoQuery(undefined);
+  
 
   const form = useForm<z.infer<typeof registerSchema>>({
-
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
@@ -90,7 +93,6 @@ export function AgentRegisterForm({className,...props}: React.HTMLAttributes<HTM
   });
 
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
-
     const userInfo = {
       name: data.name,
       email: data.email,
@@ -100,11 +102,17 @@ export function AgentRegisterForm({className,...props}: React.HTMLAttributes<HTM
       nidNumber: data.nidNumber,
     };
 
+    if (userData?.data?.email) {
+      toast.error("You're already logged in");
+      navigate("/");
+      return;
+    }
+
     try {
       const toastId = toast.loading("Creating User");
       await register(userInfo).unwrap();
-      toast.success("User created successfully", { id : toastId});
-      navigate("/verify", { state: { email : data.email , role : "AGENT"}});
+      toast.success("User created successfully", { id: toastId });
+      navigate("/verify", { state: { email: data.email, role: "AGENT" } });
     } catch (error) {
       console.log(error);
     }

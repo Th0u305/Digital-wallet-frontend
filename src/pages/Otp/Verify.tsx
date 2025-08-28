@@ -61,13 +61,11 @@ export default function Verify() {
     const toastId = toast.loading("Sending OTP");
 
     try {
-      const res = await sendOtp({ email: email, role : role }).unwrap();
-
-      if (res.success) {
-        toast.success("OTP Sent", { id: toastId });
-        setConfirmed(true);
-        setTimer(5);
-      }
+      await sendOtp({ email: email, role : role }).unwrap();
+      toast.success("OTP Sent", { id: toastId });
+      setConfirmed(true);
+      setTimer(5);
+      
     } catch (err) {
       console.log(err);
     }
@@ -82,12 +80,11 @@ export default function Verify() {
     };
 
     try {
-      const res = await verifyOtp(userInfo).unwrap();
-      if (res.success) {
-        toast.success("OTP Verified", { id: toastId });
-        setConfirmed(true);
-        navigate("/login");
-      }
+      await verifyOtp(userInfo).unwrap();
+      toast.success("OTP Verified", { id: toastId });
+      setConfirmed(true);
+      navigate("/login");
+      
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       toast.error("something went wrong")

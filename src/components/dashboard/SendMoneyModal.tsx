@@ -26,7 +26,7 @@ import { useAppDispatch } from "@/redux/hook";
 
 interface MONEY {
   money : string,
-  email : string
+  email : string,
 }
 
 const SendMoneyModal = () =>{
@@ -48,17 +48,23 @@ const SendMoneyModal = () =>{
     
     try {
       const res = await sendMoney({ userInfo, id });
+      console.log(res);
       
       const toastId = toast.loading("Sending money");
       if (res.error) {
-        return toast.error("Something went wrong", { id : toastId})
+        if (res?.error?.data?.message === "Receiver account doesn't exists") {
+          return toast.error("Wrong email address", { id : toastId})
+        }
+        if (res?.error?.data?.message === "Insufficient funds for this operation.") {
+          return toast.error("Insufficient funds", { id : toastId})
+        }
       }
       toast.success("successfully sent money", { id: toastId });
       dispatch(authApi.util.resetApiState());
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      toast.error("Something went wrong")
-      // console.log(error);  
+      
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err:any) {
+      toast.error(err.data.message);
     }
   };
 
@@ -84,7 +90,7 @@ const SendMoneyModal = () =>{
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel> Recipient Phone Number</FormLabel>
+                    <FormLabel> Recipient email Number</FormLabel>
                     <FormControl>
                       <Input
                         type="email"

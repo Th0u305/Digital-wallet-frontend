@@ -1,7 +1,6 @@
-import { CreditCardIcon, DollarSign } from "lucide-react";
+import { CreditCardIcon } from "lucide-react";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -10,45 +9,59 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { Input } from "../ui/input";
 import {
   authApi,
-  useAddOrWithDrawMutation,
+  useSendMoneyMutation,
 } from "@/redux/features/auth/auth.api";
 import { toast } from "sonner";
 import { useAppDispatch } from "@/redux/hook";
+import { FormControl, FormField, FormItem, FormLabel } from "../ui/form";
+import { Button } from "../ui/button";
 
-type Inputs = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
-  amount: number;
-};
+interface MONEY {
+  money : string,
+  email : string,
+}
 
 const CashOutMoneyModal = () => {
-  const [addMoney] = useAddOrWithDrawMutation();
+  const [sendMoney] = useSendMoneyMutation();
   const dispatch = useAppDispatch();
-
-
-  const { register, handleSubmit } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    if (data.amount < 50) {
-      return toast.error("Minimum amount is 50");
-    }
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      money: "",
+    },
+  });
+  const onSubmit = async (data: MONEY) => {
+    const id = data.email;
     const userInfo = {
-      amount: Number(data.amount),
+      amount: Number(data.money),
       transactionType: "CASH_OUT",
     };
 
     try {
-      await addMoney(userInfo).unwrap();
-      const toastId = toast.loading("Cashing out money");
-      toast.success("cash out successful", { id: toastId });
+      const res = await sendMoney({ userInfo, id });
+      console.log(res);
+
+      const toastId = toast.loading("Cash out money");
+      if (res.error) {
+        if (res?.error?.data?.message === "Receiver account doesn't exists") {
+          return toast.error("Wrong email address", { id: toastId });
+        }
+        if (
+          res?.error?.data?.message === "Insufficient funds for this operation."
+        ) {
+          return toast.error("Insufficient funds", { id: toastId });
+        }
+      }
+      toast.success("successfully cashed out money", { id: toastId });
       dispatch(authApi.util.resetApiState());
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      toast.error("Something went wrong");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.error(err.data.message);
     }
   };
 
@@ -56,48 +69,65 @@ const CashOutMoneyModal = () => {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <span>
-          <button className="group-hover:scale-110 transition-transform p-0 mx-auto w-6 h-6 cursor-pointer">
+          <button className="group-hover:scale-110 transition-transform p-0 mx-auto w-6 h-6 mt-3 cursor-pointer">
             <CreditCardIcon />
           </button>
         </span>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>With draw money</AlertDialogTitle>
-          <AlertDialogDescription />
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
         </AlertDialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Amount to Add
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <DollarSign className="h-5 w-5 text-gray-400" />
-              </div>
-              <Input
-                {...register("amount")}
-                type="number"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
-          </div>
+        <AlertDialogDescription />
+        <FormProvider {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* name */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel> Recipient email Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="example@gmail.com"
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-            <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-              How it works:
-            </h3>
-            <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-              <li>• Visit a nearby SecureWallet agent</li>
-              <li>• Show them this deposit request</li>
-              <li>• Give cash to the agent</li>
-              <li>• Money will be added instantly</li>
-            </ul>
-          </div>
-          <AlertDialogAction type="submit">Cash Out</AlertDialogAction>
-        </form>
+            <FormField
+              control={form.control}
+              name="money"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={50}
+                      placeholder="0.00"
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full">
+              Cash Out
+            </Button>
+          </form>
+        </FormProvider>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel
+          // onClick={()=>setisopen(!open)}
+          >
+            Cancel
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

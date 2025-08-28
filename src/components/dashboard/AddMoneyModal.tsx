@@ -40,14 +40,14 @@ const AddMoneyModal = () => {
     };
 
     try {
-      const toastId = toast.loading("Adding money");
       await addMoney(userInfo).unwrap();
+      const toastId = toast.loading("Adding money");
       toast.success("Added money successfully", { id: toastId });
       dispatch(authApi.util.resetApiState());
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      toast.error("Something went wrong");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err:any) {
+      toast.error(err.data.message);
     }
   };
 

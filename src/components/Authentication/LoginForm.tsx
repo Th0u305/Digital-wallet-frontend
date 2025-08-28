@@ -9,7 +9,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { authApi, useLoginMutation, useLogoutMutation, useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import {
+  authApi,
+  useLoginMutation,
+  useLogoutMutation,
+  useUserInfoQuery,
+} from "@/redux/features/auth/auth.api";
 import { type FieldValues, type SubmitHandler, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -24,16 +29,16 @@ import {
 } from "../ui/select";
 import { useAppDispatch } from "@/redux/hook";
 
-const LoginForm = ({ className,...props}: React.HTMLAttributes<HTMLDivElement>) => {
-
+const LoginForm = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
   const navigate = useNavigate();
-  const { data : userData } = useUserInfoQuery(undefined);
+  const { data: userData } = useUserInfoQuery(undefined);
   const dispatch = useAppDispatch();
   const [logout] = useLogoutMutation();
 
-
   const form = useForm({
-
     defaultValues: {
       email: "",
       password: "",
@@ -44,38 +49,34 @@ const LoginForm = ({ className,...props}: React.HTMLAttributes<HTMLDivElement>) 
   const [login] = useLoginMutation();
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-
     if (userData?.data?.email) {
-      toast.error("You're already logged in")
-      navigate("/")
-      return
+      toast.error("You're already logged in");
+      navigate("/");
+      return;
     }
 
     try {
-      
       const res = await login(data).unwrap();
-      if (res.success) {
 
-        if(!res?.data?.user?.isVerified) {
-          toast.error("Your're not verified")
-          navigate("/verify", { state: { email : data.email , role : res?.data?.user?.role}});
-          return await logout(undefined);
-        }
-
-        const toastId = toast.loading("Logging");
-        toast.success("Logged in successfully", { id : toastId});
-        navigate("/");
-        dispatch(authApi.util.resetApiState());
-        
+      if (!res?.user?.isVerified) {
+        toast.error("Your're not verified");
+        navigate("/verify", {
+          state: { email: data.email, role: res?.data?.user?.role },
+        });
+        return await logout(undefined);
       }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const toastId = toast.loading("Logging");
+      toast.success("Logged in successfully", { id: toastId });
+      navigate("/");
+      dispatch(authApi.util.resetApiState());
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-
       if (err?.data) {
-        toast.error(err?.data?.message)
+        toast.error(err?.data?.message);
       }
-      
+
       // if (err.data?.message === "No account found with this email") {
       //   toast.error("No account found")
       // }
@@ -86,9 +87,8 @@ const LoginForm = ({ className,...props}: React.HTMLAttributes<HTMLDivElement>) 
 
       if (err?.data?.message === "User is not verified") {
         toast.error("Your account is not verified");
-        navigate("/verify", { state: { email : data.email , role : data.role}});
+        navigate("/verify", { state: { email: data.email, role: data.role } });
         return await logout(undefined);
-
       }
     }
   };
@@ -189,6 +189,6 @@ const LoginForm = ({ className,...props}: React.HTMLAttributes<HTMLDivElement>) 
       </div>
     </div>
   );
-}
+};
 
-export default LoginForm
+export default LoginForm;
