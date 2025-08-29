@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/input-otp";
 import { cn } from "@/lib/utils";
 import {
-  useSendOtpMutation,
+  useSendOtpQuery,
   useVerifyOtpMutation,
 } from "@/redux/features/auth/auth.api";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +33,7 @@ import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import z from "zod";
+import emailjs from "@emailjs/browser";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -43,37 +44,54 @@ const FormSchema = z.object({
 export default function Verify() {
   const location = useLocation();
   const navigate = useNavigate();
-  const email = location.state?.email
-  const role = location.state?.role
+  const email = location.state?.email;
+  const role = location.state?.role;
   const [confirmed, setConfirmed] = useState(false);
-  const [sendOtp] = useSendOtpMutation();
   const [verifyOtp] = useVerifyOtpMutation();
   const [timer, setTimer] = useState(5);
+  const { data } = useSendOtpQuery({ email: email, role: role });
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      pin: "",
-    },
-  });
+    defaultValues: { pin: "" },
+  })
+
 
   const handleSendOtp = async () => {
-    const toastId = toast.loading("Sending OTP");
+
+    const date = new Date();
+    const message = `Your Otp is ${data}`;
+
+    const emailParams = {
+      name: "ddddd",
+      email: email,
+      time: date,
+      message: message,
+    };
+
+    const serviceID = import.meta.env.VITE_EMAIL_JS_PUBLIC_SERVICE_ID
+    const templateID = import.meta.env.VITE_EMAIL_JS_PUBLIC_TEMPLATE_ID
+    const pubKey = import.meta.env.VITE_EMAIL_JS_PUBLIC_KEY
 
     try {
-      
-      await sendOtp({ email: email, role : role }).unwrap();      
-      toast.success("OTP Sent", { id: toastId });
-      setConfirmed(true);
-      setTimer(5);
-      
+      const toastId = toast.loading("Sending OTP");
+      await emailjs.send(serviceID || "", templateID || "", emailParams, pubKey ).then(
+          () => {
+            toast.success("OTP Sent", { id: toastId });
+            setConfirmed(true);
+            setTimer(5);
+
+          },() => {            
+            toast.error("Something went wrong")
+          }
+        );
     } catch (err) {
-      
       console.log(err);
     }
   };
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    
     const toastId = toast.loading("Verifying OTP");
     const userInfo = {
       email,
@@ -86,10 +104,10 @@ export default function Verify() {
       toast.success("OTP Verified", { id: toastId });
       setConfirmed(true);
       navigate("/login");
-      
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      toast.error("something went wrong")
+      toast.error("something went wrong");
       // console.log(err);
     }
   };

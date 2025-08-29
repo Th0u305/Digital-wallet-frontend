@@ -32,11 +32,11 @@ export const authApi = baseApi.injectEndpoints({
         data: userInfo,
       }),
     }),
-    sendOtp: builder.mutation<IResponse<null>, ISendOtp>({
-      query: (userInfo) => ({
-        url: "/otp/send",
-        method: "POST",
-        data: userInfo,
+    sendOtp: builder.query<IResponse<null>, ISendOtp>({
+      query: ({email, role}) => ({
+        url: `/otp/send?email=${email}&role=${role}`,
+        method: "GET",
+        // data: userInfo,
       }),
     }),
     verifyOtp: builder.mutation<IResponse<null>, IVerifyOtp>({
@@ -113,7 +113,7 @@ export const authApi = baseApi.injectEndpoints({
 
 export const {
   useLoginMutation,
-  useSendOtpMutation,
+  useSendOtpQuery,
   useVerifyOtpMutation,
   useUserInfoQuery,
   useLogoutMutation,
